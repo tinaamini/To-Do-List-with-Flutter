@@ -1,14 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:todolist_front/screens/AddTask.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget{
+  @override
+  _HomeState createState() => _HomeState();
+}
+class _HomeState extends State<Home> {
+  List<String> tasks = [];
+
+
+  void addTask(String task) {
+    setState(() {
+      tasks.add(task);
+    });
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body:SafeArea(
+      child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 100.0),
+            padding: const EdgeInsets.only(top: 35.0),
             child: Text(
               'Home',
               style: TextStyle(
@@ -18,21 +35,21 @@ class Home extends StatelessWidget {
               ),
             ),
           ),
-          Spacer(), // فضای خالی دینامیک
+          Spacer(),
           Padding(
-            padding: const EdgeInsets.only(bottom: 10.0), // فاصله از پایین
+            padding: const EdgeInsets.only(bottom: 108.0, left: 25.0, right: 25.0,    ),
             child: ElevatedButton(
               onPressed: () {
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (context) => Home()));
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => AddTask()));
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
-                minimumSize: Size(331.0, 54.0),
+                minimumSize: Size(331.0, 52.0),
                 backgroundColor: Color(0xFF774BF1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(
-                      Radius.circular(20)), // تنظیم شعاع گردی
+                      Radius.circular(25)),
                 ),
               ),
               child: Row(
@@ -40,24 +57,26 @@ class Home extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      "Let's Start",
+                      "Add Task",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1),
                     ),
                   ),
                   SvgPicture.asset(
-                    'assets/svg/ArrowLeft.svg',
+                    'assets/svg/IconAdd.svg',
                     width: 24,
                     height: 24,
                   )
+
                 ],
               ),
             ),
           ),
         ],
+      ),
       ),
     );
   }

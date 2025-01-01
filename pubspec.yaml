@@ -65,6 +65,8 @@ flutter:
   assets:
     - assets/images/Splash.jpg
     - assets/svg/ArrowLeft.svg
+    - assets/svg/IconAdd.svg
+    - assets/svg/bag.svg
 
 
 
