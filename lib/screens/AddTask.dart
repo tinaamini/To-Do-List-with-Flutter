@@ -4,14 +4,14 @@ import 'package:flutter_svg/svg.dart';
 import '../models/category.dart';
 import 'package:http/http.dart' as http;
 
-
-
 class AddTask extends StatefulWidget {
   @override
   State<AddTask> createState() => _AddTaskState();
 }
 
 class _AddTaskState extends State<AddTask> {
+  String _title = "Categories";
+
   List<Category> categories = [];
   TextEditingController _controller = TextEditingController();
 
@@ -19,19 +19,43 @@ class _AddTaskState extends State<AddTask> {
   void initState() {
     super.initState();
     fetchCategories();
+
   }
 
   Future<void> fetchCategories() async {
     final response =
-    await http.get(Uri.parse('http://127.0.0.1:8000/categories'));
+        await http.get(Uri.parse('http://192.168.1.11:8000/categories'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       setState(() {
         categories = data.map((item) => Category.fromJson(item)).toList();
+        if (categories.isNotEmpty) {
+          _title = categories[0].name;
+        }
       });
     } else {
       throw Exception('Failed to load categories');
+    }
+  }
+
+  Future<void> sendDataToApi(String name) async {
+    final url = Uri.parse('http://192.168.1.11:8000/new-category');
+    final response = await http.post(
+      url,
+      headers: {
+        "accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode({"name": name}),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      print(responseData['message']);
+
+    } else {
+      print("Failed to send data.");
     }
   }
 
@@ -63,7 +87,7 @@ class _AddTaskState extends State<AddTask> {
                 ),
                 Padding(
                   padding:
-                  const EdgeInsets.only(top: 25.0, left: 20.0, right: 20.0),
+                      const EdgeInsets.only(top: 25.0, left: 20.0, right: 20.0),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -96,8 +120,7 @@ class _AddTaskState extends State<AddTask> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              Text(
-                                'Work',
+                              Text(_title,
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 16.0,
@@ -119,23 +142,46 @@ class _AddTaskState extends State<AddTask> {
                               filled: true,
                               fillColor: Colors.grey[100],
                             ),
+                            onChanged: (value){
+                              setState(() {
+                                _title=value;
+                              });
+                            },
                           ),
                         ),
                         categories.isEmpty
                             ? Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('No categories available.'),
-                        )
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text('No categories available.'),
+                              )
                             : Column(
-                          children: categories
-                              .map((category) => ListTile(
-                            title: Text(category.name),
-                          ))
-                              .toList(),
-                        ),
+                                children: categories
+                                    .map((category) => ListTile(
+                                          title: Text(category.name),
+                                          onTap: (){
+                                            setState(() {
+                                              _title=category.name;
+                                            });
+                                          },
+
+                                        ))
+                                    .toList(),
+                              ),
                       ],
                     ),
                   ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_controller.text.isNotEmpty) {
+                      sendDataToApi(_controller.text);
+                      _controller.clear();
+                      print(_controller.text);
+                    } else {
+                      print('text is emty');
+                    }
+                  },
+                  child: Text('add'),
                 ),
               ],
             ),
