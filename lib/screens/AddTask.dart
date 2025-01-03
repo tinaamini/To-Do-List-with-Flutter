@@ -1,8 +1,9 @@
-import 'dart:convert';
+//........imports......
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import '../models/category.dart';
-import 'package:http/http.dart' as http;
+import '../services/api_service.dart';
+
 
 class AddTask extends StatefulWidget {
   @override
@@ -11,57 +12,84 @@ class AddTask extends StatefulWidget {
 
 class _AddTaskState extends State<AddTask> {
   String _title = "Categories";
-
   List<Category> categories = [];
-  TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  Color _labelColor = Colors.black;
+  final TextEditingController _controller = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  int? _selectedCategory;
 
+
+  // -----initState----------------
   @override
   void initState() {
     super.initState();
-    fetchCategories();
-
+    loadCategories();
+    _focusNode.addListener(() {
+      setState(() {
+        _labelColor = _focusNode.hasFocus ? Colors.grey : Colors.black;
+      });
+    });
   }
 
-  Future<void> fetchCategories() async {
-    final response =
-        await http.get(Uri.parse('http://192.168.1.11:8000/categories'));
-
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
+//------------futures---------------
+  Future<void> loadCategories() async {
+    try {
+      final data = await Service.fetchCategories();
       setState(() {
         categories = data.map((item) => Category.fromJson(item)).toList();
         if (categories.isNotEmpty) {
           _title = categories[0].name;
         }
       });
-    } else {
-      throw Exception('Failed to load categories');
+    } catch (e) {
+      print('Error fetching categories: $e');
     }
   }
 
-  Future<void> sendDataToApi(String name) async {
-    final url = Uri.parse('http://192.168.1.11:8000/new-category');
-    final response = await http.post(
-      url,
-      headers: {
-        "accept": "application/json",
-        "Content-Type": "application/json"
-      },
-      body: jsonEncode({"name": name}),
+
+  Future<void> addCategory(String name) async {
+    await Service.sendDataToApi(name);
+    await loadCategories();
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
+  }
 
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
-      print(responseData['message']);
+  Future<void> _addTask() async {
+    final title = _titleController.text.trim();
+    final description = _descriptionController.text.trim();
 
-    } else {
-      print("Failed to send data.");
+    if (title.isEmpty || description.isEmpty || _selectedCategory == null) {
+      _showError("All fields are required");
+      return;
+    }
+    print('Title: $title');
+    print('Description: $description');
+    print('Category ID: $_selectedCategory');
+
+    try {
+      await Service().createTask(title, description, _selectedCategory!);
+      print("Task successfully added!");
+      Navigator.pop(context); //
+    } catch (e) {
+      _showError("Error adding task: $e");
     }
   }
 
+
+
+  // -----------------dispose-------------
   @override
   void dispose() {
     _controller.dispose();
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -100,6 +128,7 @@ class _AddTaskState extends State<AddTask> {
                         ),
                       ],
                     ),
+                    // ----------------------categories
                     child: ExpansionTile(
                       title: Row(
                         children: [
@@ -120,7 +149,8 @@ class _AddTaskState extends State<AddTask> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              Text(_title,
+                              Text(
+                                _title,
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 16.0,
@@ -142,9 +172,9 @@ class _AddTaskState extends State<AddTask> {
                               filled: true,
                               fillColor: Colors.grey[100],
                             ),
-                            onChanged: (value){
+                            onChanged: (value) {
                               setState(() {
-                                _title=value;
+                                _title = value;
                               });
                             },
                           ),
@@ -158,12 +188,12 @@ class _AddTaskState extends State<AddTask> {
                                 children: categories
                                     .map((category) => ListTile(
                                           title: Text(category.name),
-                                          onTap: (){
+                                          onTap: () {
                                             setState(() {
-                                              _title=category.name;
+                                              _title = category.name;
+                                              _selectedCategory = category.id;
                                             });
                                           },
-
                                         ))
                                     .toList(),
                               ),
@@ -171,16 +201,82 @@ class _AddTaskState extends State<AddTask> {
                     ),
                   ),
                 ),
+                SizedBox(height: 15),
+
+                //-----------------text field task name
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 0,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          )
+                        ]),
+                    child: TextField(
+                      controller: _titleController,
+                      focusNode: _focusNode,
+                      decoration: InputDecoration(
+                        labelText: 'Task Name',
+                        labelStyle: TextStyle(
+                            color: _labelColor, fontWeight: FontWeight.w600),
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 15),
+                //----------------------text field description
+
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Container(
+                    height: 180.0,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 0,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          )
+                        ]),
+                    child: TextField(
+                      controller: _descriptionController,
+                      focusNode: _focusNode,
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                        labelStyle: TextStyle(
+                            color: _labelColor, fontWeight: FontWeight.w600),
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      ),
+                    ),
+                  ),
+                ),
+                // ----------------elevate button add
+                SizedBox(height: 150,),
                 ElevatedButton(
-                  onPressed: () {
-                    if (_controller.text.isNotEmpty) {
-                      sendDataToApi(_controller.text);
-                      _controller.clear();
-                      print(_controller.text);
-                    } else {
-                      print('text is emty');
-                    }
-                  },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    minimumSize: Size(331.0, 52.0),
+                    backgroundColor: Color(0xFF774BF1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(25)),
+                    ),
+                  ),
+                  onPressed: _addTask,
                   child: Text('add'),
                 ),
               ],
