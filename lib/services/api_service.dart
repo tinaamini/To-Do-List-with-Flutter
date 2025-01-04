@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import '../models/task.dart';
 
 
 class Service {
   static const String _baseUrl = 'http://192.168.1.11:8000';
+
+
   // add new category
   static Future<void> sendDataToApi(String name) async {
     final url = Uri.parse('$_baseUrl/new-category');
@@ -38,7 +39,7 @@ class Service {
   }
 
   // add new task
-  Future<void> createTask(String title, String description, int categoryId) async {
+   Future<void> createTask(String title, String description, int categoryId) async {
     final url = Uri.parse('$_baseUrl/new-task'); // آدرس API
     final response = await http.post(
       url,
@@ -61,12 +62,14 @@ class Service {
       print(response.body);
     }
   }
-  Future<List<Task>> fetchTasks() async {
-    final response = await http.get(Uri.parse('http://$_baseUrl/tasks'));
+  static Future<List<Task>> fetchTasks() async {
+    final response = await http.get(Uri.parse('$_baseUrl/tasks'));
 
     if (response.statusCode == 200) {
+      print('Data received: ${response.body}');
       List<dynamic> data = json.decode(response.body);
       return data.map((task) => Task.fromJson(task)).toList();
+
     } else {
       throw Exception('Failed to load tasks');
     }
