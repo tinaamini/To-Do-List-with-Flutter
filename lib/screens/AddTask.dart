@@ -68,9 +68,9 @@ class _AddTaskState extends State<AddTask> {
       _showError("All fields are required");
       return;
     }
-    print('Title: $title');
-    print('Description: $description');
-    print('Category ID: $_selectedCategory');
+    // print('Title: $title');
+    // print('Description: $description');
+    // print('Category ID: $_selectedCategory');
 
     try {
       await Service().createTask(title, description, _selectedCategory!);

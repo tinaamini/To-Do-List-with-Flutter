@@ -66,8 +66,8 @@ class Service {
     final response = await http.get(Uri.parse('$_baseUrl/tasks'));
 
     if (response.statusCode == 200) {
-      print('Data received: ${response.body}');
-      List<dynamic> data = json.decode(response.body);
+      print('Data received: ${utf8.decode(response.bodyBytes)}');
+      List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
       return data.map((task) => Task.fromJson(task)).toList();
 
     } else {
@@ -77,6 +77,7 @@ class Service {
 
 
 }
+
 
 
 
