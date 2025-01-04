@@ -8,6 +8,7 @@ class SplashScreen extends StatelessWidget {
     return Scaffold(
         body: SafeArea(
         child:Container(
+
       color: Colors.white,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -46,7 +47,11 @@ class SplashScreen extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    children: [SvgPicture.asset(
+                      'assets/svg/ArrowLeft.svg',
+                      width: 24,
+                      height: 24,
+                    ),
                       Expanded(
                         child: Text(
                           "Let's Start",
@@ -57,11 +62,7 @@ class SplashScreen extends StatelessWidget {
                               letterSpacing: 1),
                         ),
                       ),
-                      SvgPicture.asset(
-                        'assets/svg/ArrowLeft.svg',
-                        width: 24,
-                        height: 24,
-                      )
+
                     ],
                   )),
             ),
