@@ -35,6 +35,7 @@ dependencies:
   flutter_svg: ^1.1.0
   flutter_localizations:
     sdk: flutter
+  auto_size_text: ^3.0.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -69,6 +70,8 @@ flutter:
     - assets/svg/ArrowLeft.svg
     - assets/svg/IconAdd.svg
     - assets/svg/bag.svg
+    - assets/svg/selected.svg
+
 
 
 

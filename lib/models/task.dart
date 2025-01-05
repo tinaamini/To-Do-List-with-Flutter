@@ -27,5 +27,6 @@ class Task {
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
       category: Category.fromJson(json['category']),
+      // category: json['category'] != null ? Category.fromJson(json['category']) : null,
     );
   }}
