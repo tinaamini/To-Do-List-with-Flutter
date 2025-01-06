@@ -68,9 +68,7 @@ class _AddTaskState extends State<AddTask> {
       _showError("All fields are required");
       return;
     }
-    // print('Title: $title');
-    // print('Description: $description');
-    // print('Category ID: $_selectedCategory');
+   
 
     try {
       await Service().createTask(title, description, _selectedCategory!);
@@ -97,7 +95,8 @@ class _AddTaskState extends State<AddTask> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: Container(
+        body:ListView(
+        children: [Container(
           decoration: BoxDecoration(color: Colors.white),
           child: Center(
             child: Column(
@@ -179,15 +178,25 @@ class _AddTaskState extends State<AddTask> {
                             },
                           ),
                         ),
-                        categories.isEmpty
+                  SizedBox(
+                    height: 200,
+                    child:categories.isEmpty
                             ? Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text('No categories available.'),
                               )
-                            : Column(
+                            : ListView(
                                 children: categories
                                     .map((category) => ListTile(
                                           title: Text(category.name),
+                                          trailing: IconButton(onPressed:(){
+                                            Service.DeletCategory(category.id.toString());
+
+                                            setState(() {
+                                              categories.remove(category);
+
+                                            });
+                                          }, icon: Icon(Icons.highlight_remove,color: Colors.red,),),
                                           onTap: () {
                                             setState(() {
                                               _title = category.name;
@@ -197,6 +206,7 @@ class _AddTaskState extends State<AddTask> {
                                         ))
                                     .toList(),
                               ),
+                  ),
                       ],
                     ),
                   ),
@@ -282,8 +292,9 @@ class _AddTaskState extends State<AddTask> {
               ],
             ),
           ),
-        ),
+        ),]
       ),
+    )
     );
   }
 }

@@ -71,6 +71,8 @@ flutter:
     - assets/svg/IconAdd.svg
     - assets/svg/bag.svg
     - assets/svg/selected.svg
+    - assets/svg/Edit.svg
+    - assets/svg/Delete.svg
 
 
 

@@ -4,7 +4,7 @@ import '../models/task.dart';
 
 
 class Service {
-  static const String _baseUrl = 'http://192.168.139.236:8000';
+  static const String _baseUrl = 'http://192.168.1.12:8000';
 
 
   // add new category
@@ -74,6 +74,23 @@ class Service {
       throw Exception('Failed to load tasks');
     }
   }
+  static Future <void> DeletCategory(String categoryId) async{
+    final response = await http.delete(Uri.parse('$_baseUrl/delete-category?category_id=$categoryId'));
+    if (response.statusCode == 200) {
+      print('Category deleted successfully');
+    } else {
+      print('Failed to delete category. Error: ${response.statusCode}');
+    }
+  }
+  static Future <void> DeletTask(String taskId) async{
+    final response=await http.delete(Uri.parse('$_baseUrl/delete-task?task_id=$taskId'));
+    if (response.statusCode == 200) {
+      print('Task deleted successfully');
+    } else {
+      print('Failed to delete Task. Error: ${response.statusCode}');
+    }
+  }
+
 
 
 }
