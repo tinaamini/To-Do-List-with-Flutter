@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// >uvicorn main:app --host 0.0.0.0 --port 8000
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:todolist_front/screens/AddTask.dart';
 import '../models/task.dart';
@@ -68,6 +69,7 @@ class _HomeState extends State<Home> {
         child: Scaffold(
       body: SingleChildScrollView(
         child: Container(
+          height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(color: Colors.white),
           child: Center(
             child: Padding(
@@ -84,6 +86,27 @@ class _HomeState extends State<Home> {
                           TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 260),
+                    child: ElevatedButton(
+                      onPressed: _toggleEdit,
+                      child: Text(
+                        _isEditing ? 'Cancel' : 'Edit',
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        minimumSize: Size(29.0, 37.0),
+                        backgroundColor: Color(0xFF774BF1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                              Radius.circular(25)),
+                        ),
+                      ),
+                    ),
+                  ),
                   SizedBox(height: 10.0),
                   FutureBuilder<List<Task>>(
                     future: _tasks,
@@ -91,7 +114,12 @@ class _HomeState extends State<Home> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
+                        return Center(child: Column(
+                          children: [
+                            Text('Please try again!!',style: TextStyle(color: Colors.red,fontSize: 24.0,fontWeight: FontWeight.w700),),
+                            Text('Error: ${snapshot.error}'),
+                          ],
+                        ));
                       } else {
                         return SizedBox(
                           height: MediaQuery.of(context).size.height * 0.6,
@@ -101,27 +129,7 @@ class _HomeState extends State<Home> {
                               final task = snapshot.data![index];
                               return Column(
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 260),
-                                    child: ElevatedButton(
-                                      onPressed: _toggleEdit,
-                                      child: Text(
-                                        _isEditing ? 'Cancel' : 'Edit',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        foregroundColor: Colors.white,
-                                        minimumSize: Size(29.0, 37.0),
-                                        backgroundColor: Color(0xFF774BF1),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(25)),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+
                                   ListTile(
                                     title: Container(
                                       height: 63.0,
@@ -334,12 +342,18 @@ class _HomeState extends State<Home> {
                         padding: const EdgeInsets.only(
                             bottom: 75.0, left: 15.0, right: 15.0),
                         child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
+                          onTap: () async {
+                            final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => AddTask()),
                             );
+                            if (result == true) {
+                              setState(() {
+                                _tasks = Service.fetchTasks();
+                              });
+                            }
+
                           },
                           child: Container(
                             height: 55.0,
@@ -383,17 +397,30 @@ class _HomeState extends State<Home> {
                         padding: const EdgeInsets.only(
                             bottom: 75.0, left: 15.0, right: 15.0),
                         child: GestureDetector(
-                          onTap: () async {
-                            print(_toggleEdit);
+                          onTap: () {  print(_taskIdToDelete);
                             if (_taskIdToDelete != null) {
-                              await Service.DeletTask(
-                                  _taskIdToDelete!.toString());
+                              Service.DeletTask(_taskIdToDelete!.toString());
+                              print(_tasks);
                               setState(() {
                                 _tasks = Service.fetchTasks();
-                                _toggleEdit;
+
+                                _toggleEdit();
                               });
+                            }else{
+                              _toggleEdit();
                             }
                           },
+                          // async {
+                          //   print(_isEditing);
+                          //   if (_taskIdToDelete != null) {
+                          //     await Service.DeletTask(
+                          //         _taskIdToDelete!.toString());
+                          //     setState((){
+                          //       _tasks = Service.fetchTasks();
+                          //       _toggleEdit();
+                          //     });
+                          //   }
+                          // },
                           child: Container(
                             height: 55.0,
                             decoration: BoxDecoration(
@@ -434,21 +461,3 @@ class _HomeState extends State<Home> {
     ));
   }
 }
-// if (_selectedIndex != null) {
-// _tasks.then((tasks) {
-// final selectedTask = tasks[_selectedIndex!];
-// Navigator.push(
-// context,
-// MaterialPageRoute(
-// builder: (context) =>
-// Editepage(task: selectedTask),
-// ),
-// );
-// });
-// } else {
-// ScaffoldMessenger.of(context).showSnackBar(
-// SnackBar(
-// content: Text('Please select an item first!'),
-// ),
-// );
-// }

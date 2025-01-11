@@ -4,7 +4,7 @@ import '../models/task.dart';
 
 
 class Service {
-  static const String _baseUrl = 'http://192.168.1.12:8000';
+  static const String _baseUrl = 'http://192.168.185.236:8000';
 
 
   // add new category

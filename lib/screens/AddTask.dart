@@ -1,9 +1,8 @@
-//........imports......
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import '../models/category.dart';
 import '../services/api_service.dart';
-
 
 class AddTask extends StatefulWidget {
   @override
@@ -13,22 +12,35 @@ class AddTask extends StatefulWidget {
 class _AddTaskState extends State<AddTask> {
   String _title = "Categories";
   List<Category> categories = [];
-  final FocusNode _focusNode = FocusNode();
-  Color _labelColor = Colors.black;
+  final FocusNode _taskNameFocusNode = FocusNode();
+  final FocusNode _descriptionFocusNode = FocusNode();
+  Color _taskNameLabelColor = Colors.black;
+  Color _descriptionLabelColor = Colors.black;
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   int? _selectedCategory;
 
+// ----time
+  Jalali _selectedDate = Jalali.now();
+  Jalali _today = Jalali.now();
 
   // -----initState----------------
   @override
   void initState() {
     super.initState();
     loadCategories();
-    _focusNode.addListener(() {
+    _taskNameFocusNode.addListener(() {
       setState(() {
-        _labelColor = _focusNode.hasFocus ? Colors.grey : Colors.black;
+        _taskNameLabelColor =
+            _taskNameFocusNode.hasFocus ? Colors.grey : Colors.black;
+      });
+    });
+
+    _descriptionFocusNode.addListener(() {
+      setState(() {
+        _descriptionLabelColor =
+            _descriptionFocusNode.hasFocus ? Colors.grey : Colors.black;
       });
     });
   }
@@ -41,13 +53,13 @@ class _AddTaskState extends State<AddTask> {
         categories = data.map((item) => Category.fromJson(item)).toList();
         if (categories.isNotEmpty) {
           _title = categories[0].name;
+          _selectedCategory = categories[0].id;
         }
       });
     } catch (e) {
       print('Error fetching categories: $e');
     }
   }
-
 
   Future<void> addCategory(String name) async {
     await Service.sendDataToApi(name);
@@ -66,20 +78,38 @@ class _AddTaskState extends State<AddTask> {
 
     if (title.isEmpty || description.isEmpty || _selectedCategory == null) {
       _showError("All fields are required");
+      //   print(title);
+      // print(description);
+      // print(_selectedCategory);
       return;
     }
-   
 
     try {
+      await addCategory(_title);
+      print(_title);
       await Service().createTask(title, description, _selectedCategory!);
       print("Task successfully added!");
-      Navigator.pop(context); //
+      Navigator.pop(context, true); //
     } catch (e) {
       _showError("Error adding task: $e");
     }
   }
 
+  // time
+  Future<void> _selectDate(BuildContext context) async {
+    final Jalali? picked = await showPersianDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: _today,
+      lastDate: Jalali(1450, 12, 30),
+    );
 
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
 
   // -----------------dispose-------------
   @override
@@ -87,16 +117,15 @@ class _AddTaskState extends State<AddTask> {
     _controller.dispose();
     _titleController.dispose();
     _descriptionController.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        body:ListView(
-        children: [Container(
+        child: Scaffold(
+      body: ListView(children: [
+        Container(
           decoration: BoxDecoration(color: Colors.white),
           child: Center(
             child: Column(
@@ -174,39 +203,47 @@ class _AddTaskState extends State<AddTask> {
                             onChanged: (value) {
                               setState(() {
                                 _title = value;
+                                print(_title);
                               });
                             },
                           ),
                         ),
-                  SizedBox(
-                    height: 200,
-                    child:categories.isEmpty
-                            ? Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text('No categories available.'),
-                              )
-                            : ListView(
-                                children: categories
-                                    .map((category) => ListTile(
-                                          title: Text(category.name),
-                                          trailing: IconButton(onPressed:(){
-                                            Service.DeletCategory(category.id.toString());
+                        SizedBox(
+                          height: 200,
+                          child: categories.isEmpty
+                              ? Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text('No categories available.'),
+                                )
+                              : ListView(
+                                  children: categories
+                                      .map((category) => ListTile(
+                                            title: Text(category.name),
+                                            trailing: IconButton(
+                                              onPressed: () {
+                                                Service.DeletCategory(
+                                                    category.id.toString());
 
-                                            setState(() {
-                                              categories.remove(category);
-
-                                            });
-                                          }, icon: Icon(Icons.highlight_remove,color: Colors.red,),),
-                                          onTap: () {
-                                            setState(() {
-                                              _title = category.name;
-                                              _selectedCategory = category.id;
-                                            });
-                                          },
-                                        ))
-                                    .toList(),
-                              ),
-                  ),
+                                                setState(() {
+                                                  categories.remove(category);
+                                                });
+                                              },
+                                              icon: Icon(
+                                                Icons.highlight_remove,
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                            onTap: () {
+                                              setState(() {
+                                                _title = category.name;
+                                                _selectedCategory = category.id;
+                                                // print(_selectedCategory);
+                                              });
+                                            },
+                                          ))
+                                      .toList(),
+                                ),
+                        ),
                       ],
                     ),
                   ),
@@ -230,11 +267,12 @@ class _AddTaskState extends State<AddTask> {
                         ]),
                     child: TextField(
                       controller: _titleController,
-                      focusNode: _focusNode,
+                      focusNode: _taskNameFocusNode,
                       decoration: InputDecoration(
                         labelText: 'Task Name',
                         labelStyle: TextStyle(
-                            color: _labelColor, fontWeight: FontWeight.w600),
+                            color: _taskNameLabelColor,
+                            fontWeight: FontWeight.w600),
                         border: InputBorder.none,
                         contentPadding:
                             EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -262,11 +300,12 @@ class _AddTaskState extends State<AddTask> {
                         ]),
                     child: TextField(
                       controller: _descriptionController,
-                      focusNode: _focusNode,
+                      focusNode: _descriptionFocusNode,
                       decoration: InputDecoration(
                         labelText: 'Description',
                         labelStyle: TextStyle(
-                            color: _labelColor, fontWeight: FontWeight.w600),
+                            color: _descriptionLabelColor,
+                            fontWeight: FontWeight.w600),
                         border: InputBorder.none,
                         contentPadding:
                             EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -274,27 +313,51 @@ class _AddTaskState extends State<AddTask> {
                     ),
                   ),
                 ),
+                // -------------start date time
+                ExpansionTile(
+                  title: Row(
+                    children: [
+                      SvgPicture.asset(
+                        'assets/svg/calendar.svg',
+                        width: 26,
+                        height: 26,
+                      ),
+                      Column(
+                        children: [
+                          Text('Start Date',style: TextStyle(color: Colors.grey,fontSize: 15),),
+                          Text('bow velam kon',style: TextStyle(color: Colors.black,fontSize: 24,fontWeight: FontWeight.w500))
+                        ],
+                      )
+
+                    ],
+                  ),
+                  children: [],
+                ),
+
                 // ----------------elevate button add
-                SizedBox(height: 150,),
+                SizedBox(
+                  height: 150,
+                ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     minimumSize: Size(331.0, 52.0),
                     backgroundColor: Color(0xFF774BF1),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(25)),
+                      borderRadius: BorderRadius.all(Radius.circular(25)),
                     ),
                   ),
                   onPressed: _addTask,
-                  child: Text('add'),
+                  child: Text(
+                    'add',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                  ),
                 ),
               ],
             ),
           ),
-        ),]
-      ),
-    )
-    );
+        ),
+      ]),
+    ));
   }
 }
