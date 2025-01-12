@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../models/task.dart';
 
@@ -86,11 +87,36 @@ class Service {
     final response=await http.delete(Uri.parse('$_baseUrl/delete-task?task_id=$taskId'));
     if (response.statusCode == 200) {
       print('Task deleted successfully');
+
     } else {
       print('Failed to delete Task. Error: ${response.statusCode}');
     }
   }
+  static Future<void> updatedTask(String taskId, String title, String description, int categoryId) async {
+    print(taskId);
+    print(title);
+    final url = Uri.parse('$_baseUrl/update-task?task_id=$taskId');
+    final response = await http.put(
+      url,
+      headers: {
+        "accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode({
+        "title": title,
+        "description": description,
+        "category_id": categoryId,
+      }),
+    );
 
+    if (response.statusCode == 200) {
+      print('Task updated successfully');
+      print(response.body);
+    } else {
+      print('Failed to update Task. Error: ${response.statusCode}');
+      print('Response: ${response.body}');
+    }
+  }
 
 
 }

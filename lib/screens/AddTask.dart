@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import '../models/category.dart';
 import '../services/api_service.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
+
+
+
+
+
 
 class AddTask extends StatefulWidget {
   @override
@@ -21,9 +26,9 @@ class _AddTaskState extends State<AddTask> {
   final TextEditingController _descriptionController = TextEditingController();
   int? _selectedCategory;
 
-// ----time
-  Jalali _selectedDate = Jalali.now();
-  Jalali _today = Jalali.now();
+
+
+
 
   // -----initState----------------
   @override
@@ -76,38 +81,23 @@ class _AddTaskState extends State<AddTask> {
     final title = _titleController.text.trim();
     final description = _descriptionController.text.trim();
 
-    if (title.isEmpty || description.isEmpty || _selectedCategory == null) {
+    if (title.isEmpty || description.isEmpty || _selectedCategory == null ) {
       _showError("All fields are required");
-      //   print(title);
-      // print(description);
-      // print(_selectedCategory);
       return;
     }
 
     try {
       await addCategory(_title);
-      print(_title);
-      await Service().createTask(title, description, _selectedCategory!);
+      await Service().createTask(
+        title,
+        description,
+        _selectedCategory!,
+        );
       print("Task successfully added!");
       Navigator.pop(context, true); //
     } catch (e) {
       _showError("Error adding task: $e");
-    }
-  }
 
-  // time
-  Future<void> _selectDate(BuildContext context) async {
-    final Jalali? picked = await showPersianDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: _today,
-      lastDate: Jalali(1450, 12, 30),
-    );
-
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
     }
   }
 
@@ -127,233 +117,311 @@ class _AddTaskState extends State<AddTask> {
       body: ListView(children: [
         Container(
           decoration: BoxDecoration(color: Colors.white),
-          child: Center(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 65.0),
-                  child: Text(
-                    'Add Task',
-                    style: TextStyle(
-                      fontSize: 19,
-                      color: Color(0xFF000000),
-                      fontWeight: FontWeight.w800,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 65.0),
+                    child: Text(
+                      'Add Task',
+                      style: TextStyle(
+                        fontSize: 19,
+                        color: Color(0xFF000000),
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(top: 25.0, left: 20.0, right: 20.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    // ----------------------categories
-                    child: ExpansionTile(
-                      title: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/svg/bag.svg',
-                            width: 26,
-                            height: 26,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 25.0, left: 20.0, right: 20.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
                           ),
-                          SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Task Group',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 12.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Text(
-                                _title,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          )
                         ],
                       ),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextField(
-                            controller: _controller,
-                            decoration: InputDecoration(
-                              hintText: 'Type something...',
-                              border: OutlineInputBorder(),
-                              filled: true,
-                              fillColor: Colors.grey[100],
+                      // ----------------------categories
+                      child: ExpansionTile(
+                        title: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/svg/bag.svg',
+                              width: 26,
+                              height: 26,
                             ),
-                            onChanged: (value) {
-                              setState(() {
-                                _title = value;
-                                print(_title);
-                              });
-                            },
-                          ),
+                            SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Task Group',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  _title,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
                         ),
-                        SizedBox(
-                          height: 200,
-                          child: categories.isEmpty
-                              ? Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text('No categories available.'),
-                                )
-                              : ListView(
-                                  children: categories
-                                      .map((category) => ListTile(
-                                            title: Text(category.name),
-                                            trailing: IconButton(
-                                              onPressed: () {
-                                                Service.DeletCategory(
-                                                    category.id.toString());
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextField(
+                              controller: _controller,
+                              decoration: InputDecoration(
+                                hintText: 'Type something...',
+                                border: OutlineInputBorder(),
+                                filled: true,
+                                fillColor: Colors.grey[100],
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _title = value;
+                                  print(_title);
+                                });
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            height: 200,
+                            child: categories.isEmpty
+                                ? Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text('No categories available.'),
+                                  )
+                                : ListView(
+                                    children: categories
+                                        .map((category) => ListTile(
+                                              title: Text(category.name),
+                                              trailing: IconButton(
+                                                onPressed: () {
+                                                  Service.DeletCategory(
+                                                      category.id.toString());
 
+                                                  setState(() {
+                                                    categories.remove(category);
+                                                  });
+                                                },
+                                                icon: Icon(
+                                                  Icons.highlight_remove,
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                              onTap: () {
                                                 setState(() {
-                                                  categories.remove(category);
+                                                  _title = category.name;
+                                                  _selectedCategory =
+                                                      category.id;
+                                                  // print(_selectedCategory);
                                                 });
                                               },
-                                              icon: Icon(
-                                                Icons.highlight_remove,
-                                                color: Colors.red,
-                                              ),
-                                            ),
-                                            onTap: () {
-                                              setState(() {
-                                                _title = category.name;
-                                                _selectedCategory = category.id;
-                                                // print(_selectedCategory);
-                                              });
-                                            },
-                                          ))
-                                      .toList(),
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 15),
-
-                //-----------------text field task name
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 0,
-                            blurRadius: 6,
-                            offset: Offset(0, 3),
-                          )
-                        ]),
-                    child: TextField(
-                      controller: _titleController,
-                      focusNode: _taskNameFocusNode,
-                      decoration: InputDecoration(
-                        labelText: 'Task Name',
-                        labelStyle: TextStyle(
-                            color: _taskNameLabelColor,
-                            fontWeight: FontWeight.w600),
-                        border: InputBorder.none,
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 15),
-                //----------------------text field description
-
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Container(
-                    height: 180.0,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 0,
-                            blurRadius: 6,
-                            offset: Offset(0, 3),
-                          )
-                        ]),
-                    child: TextField(
-                      controller: _descriptionController,
-                      focusNode: _descriptionFocusNode,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        labelStyle: TextStyle(
-                            color: _descriptionLabelColor,
-                            fontWeight: FontWeight.w600),
-                        border: InputBorder.none,
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      ),
-                    ),
-                  ),
-                ),
-                // -------------start date time
-                ExpansionTile(
-                  title: Row(
-                    children: [
-                      SvgPicture.asset(
-                        'assets/svg/calendar.svg',
-                        width: 26,
-                        height: 26,
-                      ),
-                      Column(
-                        children: [
-                          Text('Start Date',style: TextStyle(color: Colors.grey,fontSize: 15),),
-                          Text('bow velam kon',style: TextStyle(color: Colors.black,fontSize: 24,fontWeight: FontWeight.w500))
+                                            ))
+                                        .toList(),
+                                  ),
+                          ),
                         ],
-                      )
-
-                    ],
-                  ),
-                  children: [],
-                ),
-
-                // ----------------elevate button add
-                SizedBox(
-                  height: 150,
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    minimumSize: Size(331.0, 52.0),
-                    backgroundColor: Color(0xFF774BF1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(25)),
+                      ),
                     ),
                   ),
-                  onPressed: _addTask,
-                  child: Text(
-                    'add',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                  SizedBox(height: 15),
+
+                  //-----------------text field task name
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 0,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            )
+                          ]),
+                      child: TextField(
+                        controller: _titleController,
+                        focusNode: _taskNameFocusNode,
+                        decoration: InputDecoration(
+                          labelText: 'Task Name',
+                          labelStyle: TextStyle(
+                              color: _taskNameLabelColor,
+                              fontWeight: FontWeight.w600),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  SizedBox(height: 15),
+                  //----------------------text field description
+
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Container(
+                      height: 180.0,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 0,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            )
+                          ]),
+                      child: TextField(
+                        controller: _descriptionController,
+                        focusNode: _descriptionFocusNode,
+                        decoration: InputDecoration(
+                          labelText: 'Description',
+                          labelStyle: TextStyle(
+                              color: _descriptionLabelColor,
+                              fontWeight: FontWeight.w600),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // -------------start date time
+
+                  // Padding(
+                  //   padding: const EdgeInsets.only(
+                  //       top: 25.0, left: 20.0, right: 20.0),
+                  //   child: Container(
+                  //     decoration: BoxDecoration(
+                  //       color: Colors.white,
+                  //       borderRadius: BorderRadius.circular(10),
+                  //       boxShadow: [
+                  //         BoxShadow(
+                  //           color: Colors.black26,
+                  //           blurRadius: 6,
+                  //           offset: Offset(0, 3),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //     child: ExpansionTile(
+                  //       title: Row(
+                  //         children: [
+                  //           SvgPicture.asset(
+                  //             'assets/svg/calendar.svg',
+                  //             width: 26,
+                  //             height: 26,
+                  //           ),
+                  //           Column(
+                  //             children: [
+                  //               Padding(
+                  //                 padding: const EdgeInsets.only(right: 21.0),
+                  //                 child: Text(
+                  //                   'Start Date',
+                  //                   style: TextStyle(
+                  //                     fontSize: 10.0,
+                  //                     color: Colors.grey,
+                  //                   ),
+                  //                 ),
+                  //               ),
+                  //               Padding(
+                  //                 padding: const EdgeInsets.only(left: 13.0),
+                  //                 child: Text(_startTime== null ? _focusedDay.toString() :_startTime.toString() ,
+                  //                     style: TextStyle(
+                  //                         fontSize: 16.0,
+                  //                         fontWeight: FontWeight.w500)),
+                  //               )
+                  //             ],
+                  //           )
+                  //         ],
+                  //       ),
+                  //       children: [
+                  //         Padding(
+                  //           padding: const EdgeInsets.all(8.0),
+                  //           child: GestureDetector(
+                  //             onTap: () async {
+                  //               Jalali? picked = await showPersianDatePicker(
+                  //                 context: context,
+                  //                 initialDate: Jalali.now(),
+                  //                 firstDate: Jalali(1380, 1, 1),
+                  //                 lastDate: Jalali(1450, 12, 29),
+                  //               );
+                  //               if (picked != null) {
+                  //                 setState(() {
+                  //                    _startTime = picked;
+                  //
+                  //
+                  //                 });
+                  //
+                  //                 // ارسال تاریخ انتخاب شده به دیتابیس
+                  //                 // sendDataToDatabase(picked);
+                  //               }
+                  //             },
+                  //             child: Container(
+                  //               padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                  //               decoration: BoxDecoration(
+                  //                 color: Color(0xFF774BF1), // رنگ پس‌زمینه کانتینر
+                  //                 borderRadius: BorderRadius.circular(8.0),
+                  //               ),
+                  //               child: Center(
+                  //                 child: Text(
+                  //                   'انتخاب تاریخ',
+                  //                   style: TextStyle(
+                  //                     color: Colors.white,
+                  //                     fontSize: 16.0,
+                  //                     fontWeight: FontWeight.bold,
+                  //                   ),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
+
+                  // ----------------elevate button add
+                  SizedBox(
+                    height: 150,
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      minimumSize: Size(331.0, 52.0),
+                      backgroundColor: Color(0xFF774BF1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(25)),
+                      ),
+                    ),
+                    onPressed: _addTask,
+                    child: Text(
+                      'add',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

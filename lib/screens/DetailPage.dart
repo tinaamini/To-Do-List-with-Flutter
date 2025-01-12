@@ -174,6 +174,114 @@ class DetailPage extends StatelessWidget {
                         ),
                       )),
                 ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: Container(height: 100.0,
+                      width: 350.0,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child:
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 23.0,vertical: 25.0),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/svg/calendar.svg',
+                              width: 26,
+                              height: 26,
+                            ),
+                            SizedBox(width: 10),
+                            Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Create At',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    task.createdAt,
+
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ]
+                            )
+                          ],
+                        ),
+                      )),
+
+
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: Container(height: 100.0,
+                      width: 350.0,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child:
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 23.0,vertical: 25.0),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/svg/calendar.svg',
+                              width: 26,
+                              height: 26,
+                            ),
+                            SizedBox(width: 10),
+                            Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'updatedAt',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    task.updatedAt,
+
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ]
+                            )
+                          ],
+                        ),
+                      )),
+
+
+                ),
 
           ]),
         ),)

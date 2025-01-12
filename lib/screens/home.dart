@@ -6,6 +6,7 @@ import '../models/task.dart';
 import '../services/api_service.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'DetailPage.dart';
+import 'Editing.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -275,12 +276,27 @@ class _HomeState extends State<Home> {
                                                                     .only(
                                                                     right:
                                                                         10.0),
-                                                            child: SvgPicture
+                                                            child:GestureDetector(
+                                                              onTap: () {
+                                                                Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                    builder: (context) => EditDetailPage(task: task),
+                                                                  ),
+                                                                ).then((updatedTask) {
+                                                                  if (updatedTask != null) {
+                                                                    setState(() {
+                                                                      _tasks = Service.fetchTasks();
+                                                                    });
+                                                                  }
+                                                                });
+                                                              },
+                                                            child:SvgPicture
                                                                 .asset(
                                                               'assets/svg/Edit.svg',
                                                               width: 24,
                                                               height: 24,
-                                                            ),
+                                                            ),)
                                                           ),
                                                           GestureDetector(
                                                               onTap: () {
