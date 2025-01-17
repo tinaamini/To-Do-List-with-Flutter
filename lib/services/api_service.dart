@@ -5,7 +5,7 @@ import '../models/task.dart';
 
 
 class Service {
-  static const String _baseUrl = 'http://192.168.185.236:8000';
+  static const String _baseUrl = 'http://192.168.1.11:8000';
 
 
   // add new category
@@ -33,7 +33,7 @@ class Service {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return json.decode(utf8.decode(response.bodyBytes));
     } else {
       throw Exception('Failed to load categories');
     }
@@ -67,7 +67,7 @@ class Service {
     final response = await http.get(Uri.parse('$_baseUrl/tasks'));
 
     if (response.statusCode == 200) {
-      print('Data received: ${utf8.decode(response.bodyBytes)}');
+      // print('Data received: ${utf8.decode(response.bodyBytes)}');
       List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
       return data.map((task) => Task.fromJson(task)).toList();
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// >uvicorn main:app --host 0.0.0.0 --port 8000
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:todolist_front/screens/AddTask.dart';
 import '../models/task.dart';
@@ -150,15 +149,16 @@ class _HomeState extends State<Home> {
                                         children: [
                                           Column(
                                             children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    right: 15.0),
-                                                child: SvgPicture.asset(
-                                                  'assets/svg/bag.svg',
-                                                  width: 26,
-                                                  height: 26,
+
+                                                Padding(
+                                                  padding: const EdgeInsets.only(right: 10.0),
+                                                  child: SvgPicture.asset(
+                                                    'assets/svg/bag.svg',
+                                                    width: 26,
+                                                    height: 26,
+
+                                                                                                ),
                                                 ),
-                                              ),
                                               Padding(
                                                 padding: const EdgeInsets.only(
                                                     left: 18.0),
@@ -251,7 +251,7 @@ class _HomeState extends State<Home> {
                                                             padding:
                                                                 const EdgeInsets
                                                                     .only(
-                                                                    top: 6.0,
+                                                                    top: 20.0,
                                                                     left: 4.0),
                                                             child: SvgPicture
                                                                 .asset(
